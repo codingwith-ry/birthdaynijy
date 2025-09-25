@@ -361,6 +361,7 @@ const HappyBirthdayWebsite = () => {
     <style>{styles}</style>
     <audio autoPlay loop hidden>
       <source src="/YTDown.com_YouTube_Le-John-Naiilang-Official-Lyric-Video_Media_WUvD8XAPI4E_008_128k.m4a" type="audio/mpeg" />
+      <source src="/Le John - Naiilang (Official Lyric Video).mp3" type="audio/mpeg" />
       Your browser does not support the audio element.
     </audio>
     {/* Intro Screen */}
@@ -531,7 +532,7 @@ const HappyBirthdayWebsite = () => {
           </div>
         </div>
       </section>
-      <hr />
+      <hr className='w-100' />
 
       {/* Main Message Section */}
         <section className="py-24 px-6 bg-pink-50" id="mainMessage" data-aos="fade-up"> 
@@ -577,17 +578,20 @@ const HappyBirthdayWebsite = () => {
             </div>
         </div>
         </section>
-        <hr />
+        <hr className='w-100' />
 
       {/* Memory Cards Section */}
         <section className="relative">
           {memories.map((memory, index) => (
             <div
               key={index}
-              className={`min-h-screen relative flex items-center justify-center px-6 py-24 ${
+              className={`min-h-screen relative flex items-center justify-center px-6 py-24 overflow-hidden ${
                 index % 2 === 0 ? 'bg-pink-50' : 'bg-white'
               }`}
               data-aos={index % 2 === 0 ? 'fade-right' : 'fade-left'}
+              data-aos-duration="1000"
+              data-aos-offset="200"
+              data-aos-once="true"
             >
             <div className="absolute inset-0 opacity-10">
                 {/* Decorative background patterns */}
@@ -636,7 +640,7 @@ const HappyBirthdayWebsite = () => {
 
         ))}
         </section>
-        <hr />
+        <hr className='w-100' />
         {/* Birthday Wishes Section */}
         <section className="py-24 px-6 bg-gradient-to-b from-white to-pink-50" id="birthdayWishes" data-aos="fade-up">
           <div className="max-w-6xl mx-auto">
@@ -691,7 +695,7 @@ const HappyBirthdayWebsite = () => {
             </div>
           </div>
         </section>
-        <hr />
+        <hr className='w-100'/>
 
         <iframe
           data-testid="embed-iframe"
