@@ -1,19 +1,111 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, Gift, Cake, Star, Sparkles, PartyPopper } from 'lucide-react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+
+const MemoryCarousel = ({ images, groupId }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const nextImage = () => {
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  return (
+    <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+      {/* Image */}
+      <div className="aspect-[4/3] relative overflow-hidden">
+        <div className="absolute inset-0 transition-transform duration-500 ease-in-out">
+          <img 
+            src={images[currentIndex]} 
+            alt={`Memory ${currentIndex + 1}`}
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Navigation arrows */}
+        <button 
+          onClick={prevImage}
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-300 hover:bg-white"
+        >
+          <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button 
+          onClick={nextImage}
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-300 hover:bg-white"
+        >
+          <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+        {/* Dots indicator */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+          {images.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentIndex(idx)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                idx === currentIndex ? 'bg-white w-4' : 'bg-white/50'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const HappyBirthdayWebsite = () => {
+    const styles = `
+      @keyframes bounce {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+    `;
+    useEffect(() => {
+      window.scrollTo(0, 0);
+    }, []);
+
+    useEffect(() => {
+      AOS.init({
+        duration: 800,
+        once: true,
+        easing: 'ease-out'
+      });
+    }, []);
+
     const [showIntro, setShowIntro] = useState(true);
     const [hasIntroEnded, setHasIntroEnded] = useState(false);
+    const [showReturnToTop, setShowReturnToTop] = useState(false);
     const [introPhase, setIntroPhase] = useState(0); // 0: fade in, 1: visible, 2: fade out
   
+    const scrollToSection = (sectionId) => {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+  useEffect(() => {
+    document.title = "Happy Birthday, Jy!";
+  }, []);
   useEffect(() => {
     // Intro sequence
-    const fadeInTimer = setTimeout(() => setIntroPhase(1), 100);
-    const visibleTimer = setTimeout(() => setIntroPhase(2), 2500);
+    const fadeInTimer = setTimeout(() => setIntroPhase(1), 1000);
+    const visibleTimer = setTimeout(() => setIntroPhase(2), 3500);
     const hideIntroTimer = setTimeout(() => {
       setShowIntro(false);
       setHasIntroEnded(true); // Set this when intro ends
-    }, 3500);
+    }, 4500);
     
     return () => {
       clearTimeout(fadeInTimer);
@@ -22,50 +114,168 @@ const HappyBirthdayWebsite = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const heroSection = document.getElementById('heroSec');
+      if (heroSection) {
+        const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+        setShowReturnToTop(window.scrollY > heroBottom);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const returnToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
   const memories = [
     {
-      title: "Sweet Memories",
-      message: "Every moment with you is a treasure worth celebrating",
-      icon: <Heart className="w-8 h-8" />
+      title: "Junior Highschool Era",
+      message: "When we first met, you immediately brought light and joy into my life. The past years sun na highschool ak was not comparable to the time na umabot ka saak life. Napakajoyful mo sun, im humor, aura, and smile, na hasta yana grateful ak na naiimdan ko la gihapon and dire nagffade.",
+      icon: <Heart className="w-8 h-8" />,
+      images: [
+        "/path/to/jhs-image1.jpg",
+        "/path/to/jhs-image2.jpg",
+        "/path/to/jhs-image3.jpg"
+      ]
     },
     {
-      title: "Joyful Times",
-      message: "Your laughter lights up every room and fills our hearts",
-      icon: <Sparkles className="w-8 h-8" />
+      title: "Senior Highschool Era",
+      message: "Dihan sine na time naconclude ko na napakaspecial mo talaga saak life. Sine na mga time ikaw an nagmotivate saak na magkamayda better aspirations saak buhay, na I should strive better and ada ka pirme para igmotivate and igreassure ak na magiging okay ta tanan.",
+      icon: <Sparkles className="w-8 h-8" />,
+      images: [
+        "/path/to/jhs-image1.jpg",
+        "/path/to/jhs-image2.jpg",
+        "/path/to/jhs-image3.jpg"
+      ]
     },
     {
-      title: "Beautiful Moments",
-      message: "Creating wonderful memories that will last forever",
-      icon: <Star className="w-8 h-8" />
+      title: "College Days",
+      message: "Constantly na gintetest ka sa mga challenges dida saim pag-iskwela dida sa LNU pero never ak nagdoubt talaga saim na di mo makakaya an mga bagay na gintthrow against saim. Hasta yana, tama ak sun na ak belief kasi tanan na challenges naovercome mo, you always come out stronger and better from every obstacle na im ginfface, and napakaproud ko na sadsun ak girlfriend.",
+      icon: <Star className="w-8 h-8" />,
+      images: [
+        "/path/to/jhs-image1.jpg",
+        "/path/to/jhs-image2.jpg",
+        "/path/to/jhs-image3.jpg"
+      ]
     },
     {
       title: "Precious Days",
-      message: "Each day with you is a gift we cherish deeply",
-      icon: <Gift className="w-8 h-8" />
+      message: "Kapag kaupod ko ikaw love, waray second na nasasayang, kay iton manlat an mga time na nakakafeel ak na happy ak talaga dahil saim presence. Hopefully, mabless kit na magdaramo pa an mga adlaw na magkaupod kit, for me to contantly express my love for you.",
+      icon: <Gift className="w-8 h-8" />,
+      images: [
+        "/path/to/jhs-image1.jpg",
+        "/path/to/jhs-image2.jpg",
+        "/path/to/jhs-image3.jpg",
+        "/path/to/jhs-image4.jpg"
+      ]
     }
   ];
 
   const wishes = [
-  {
-    name: "Sarah Johnson",
-    message: "May your heart be filled with endless joy and your days with laughter!",
-    profileImage: "/path/to/sarah.jpg",
-    togetherImage: "/path/to/sarah-ryan.jpg",
-    relationship: "Best Friend"
-  },
-  {
-    name: "Mike Chen",
-    message: "Wishing you another year of amazing adventures and beautiful memories!",
-    profileImage: "/path/to/mike.jpg",
-    togetherImage: "/path/to/mike-ryan.jpg",
-    relationship: "College Buddy"
-  },
-  // Add more wishes...
-];
+    {
+      message: "Sana na maintindihan ka love sa mga tawo in the way na naiintindihan ko ikaw.",
+      emoji: "💖"
+    },
+    {
+      message: "Hoping love na makahanap ka pirme happiness sa tanan na im ginhihimo.",
+      emoji: "✨"
+    },
+    { message: "Sana love na maging safe and healthy ka pirme at all times.", 
+      emoji: "🌟" 
+    },
+    { 
+      message: "Wishing you love na maging successful ka sa tanan na im ginhihimo.", 
+      emoji: "🚀" 
+    },
+    {
+      message: "Kunta na magkamayda ka pirme enough na kwarta panglazada and shopee.",
+      emoji: "😊"
+    },
+    {
+      message: "Wish ko love na bisan nano na im gastos, is makapagsave ka la gihap para mayda ka gagamiton at all times HAHAHAH.",
+      emoji: "🌈"
+    },
+    {
+      message: "Kunta maintindihan sa mga tawo na nasusul an ka kapag ginpapansin nira an imo skin blemishes, kunta marealize nira na kahit sira mayda manlat sun and totally normal la talaga tun.",
+      emoji: "🎉"
+    },
+    {
+      message: "Kunta na magkamayda kam pirme time saim friends para makapagcatch up kay aram ko na kelangan mo lat tun sira",
+      emoji: "🌸"
+    },
+    {
+      message: "Wish ko love para saim family na kunta mas magkamayda pa better days sira imo kuya, si anli, dikan sim mama.",
+      emoji: "🎂"
+    },
+    {
+      message: "Kunta na magkamayda ka pirme time para saim self para makapagrelax ka and makapagself care ka.",
+      emoji: "💆‍♀️"
+    },
+    {
+      message:"Sana love dire mawara an imo confidence saim sarili, na kunta pirme mo maisip na kaya mo mag execute no matter what the situation is.",
+      emoji: "💪"
+    },
+    {
+      message: "Wish ko love na maging patient ka pirme sa mga bagay na di mo kaya ihandle kaagad sin maayos.",
+      emoji: "🧘‍♀️"
+    },
+    {
+      message: "Kunta love na dire mawara saim an pagiging understanding towards sa mga tawo na namemeet mo.",
+      emoji: "🤝"
+    },
+    {
+      message: "Sana love na mahanap mo pirme an time para maisip mo ak (hehe)",
+      emoji: "😘"
+    },
+    {
+      message: "Kunta love na dire mawara saim an pagiging open minded sa mga bagay na di mo pa naexperience.",
+      emoji: "🧠"
+    },
+    {
+      message: "Kunta love na matagan ka pa damo na opportunities para magamit and maimprove mo an imo skills.",
+      emoji: "🎯"
+    },
+    {
+      message: "Kunta love na magkamayda ka pirme time para saim family, friends, and sa ak.",
+      emoji: "👨‍👩‍👧‍👦"
+    },
+    {
+      message: "Sana love na makaupod ko ta ikaw utro dihan sa Manila for many more adventures and experiences."
+    },
+    {
+      message: "Wish ko love na kunta maibanan im pagka OA sa mga bagay-bagay HAHAHAHAH",
+      emoji: "😂"
+    },
+    {
+      message: "Kunta na dire ka na mamroblema love sa kun nano im susul uton for certain occasions kay damo manlat talaga im bado HAHAHAHAH",
+      emoji: "👗"
+    },
+    {
+      message: "Sana love na mas damo pa na photobooth at matry para mas damo ato pictures hehehe",
+      emoji: "📸"
+    },
+    {
+      message: "Wish ko love na kunta pag nalalag kit dire na magsuol im tiyan para foodtrip kit sin maayos HAHAHAH",
+      emoji: "🍔"
+    }
+  ];
+
 
   return (
+    
     <div id="mainBody" className="min-h-screen bg-gradient-to-b from-pink-50 via-white to-pink-50">
+    <style>{styles}</style>
+    <audio autoPlay loop hidden>
+      <source src="/YTDown.com_YouTube_Le-John-Naiilang-Official-Lyric-Video_Media_WUvD8XAPI4E_008_128k.m4a" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
     {/* Intro Screen */}
       {showIntro && (
         <div className={`fixed inset-0 z-50 bg-gradient-to-br from-pink-400 via-rose-400 to-pink-500 flex items-center justify-center transition-all duration-1000 ${
@@ -88,7 +298,7 @@ const HappyBirthdayWebsite = () => {
               introPhase >= 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`} 
             style={{fontFamily: 'Dancing Script, cursive', textShadow: '0 4px 20px rgba(0,0,0,0.3)'}}>
-              Happy Birthday!
+              Happy Birthday, Jy!
             </h1>
 
             {/* Subtitle */}
@@ -134,7 +344,7 @@ const HappyBirthdayWebsite = () => {
           <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-pink-300 rounded-full opacity-20 blur-2xl"></div>
         </div>
 
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
+        <div className="max-w-6xl py-10 px-5 mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
           {/* Text Content */}
           <div className="text-center lg:text-left order-2 lg:order-1">
             <div className="mb-8">
@@ -162,18 +372,23 @@ const HappyBirthdayWebsite = () => {
             </div>
             
             <p className="text-lg md:text-xl text-gray-600 mb-10 font-light leading-relaxed max-w-lg mx-auto lg:mx-0">
-              Today we celebrate not just another year, but another year of your beautiful soul, 
-              your infectious laughter, and the countless ways you make this world brighter.
+              For the person that constantly brings a smile to my face, and fills my life with love and laughter.
+              <br />
+              <b>22</b> wonderful years, which brought joy to everyone around you, and I can't wait to see what the future holds for you.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <div className="inline-flex items-center space-x-2 px-8 py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+              <div 
+                onClick={() => scrollToSection('birthdayWishes')}
+                className="inline-flex items-center space-x-2 px-8 py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer">
                 <Heart className="w-5 h-5" />
-                <span>Check Birthday Greetings</span>
+                <span>Check 22 Wishes</span>
               </div>
-              <div className="inline-flex items-center space-x-2 px-8 py-4 bg-white text-pink-600 border-2 border-pink-200 rounded-full font-semibold hover:bg-pink-50 transition-all duration-300">
+              <div 
+                onClick={() => scrollToSection('mainMessage')}
+                className="inline-flex items-center space-x-2 px-8 py-4 bg-white text-pink-600 border-2 border-pink-200 rounded-full font-semibold hover:bg-pink-50 transition-all duration-300 cursor-pointer">
                 <Sparkles className="w-5 h-5" />
-                <span>View Memories</span>
+                <span>View Messages</span>
               </div>
             </div>
 
@@ -232,19 +447,12 @@ const HappyBirthdayWebsite = () => {
             </div>
           </div>
         </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-pink-300 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-pink-400 rounded-full mt-2"></div>
-          </div>
-        </div>
       </section>
-
+      <hr />
 
       {/* Main Message Section */}
-        <section className="py-24 px-6 bg-pink-50">
-        <div className="max-w-4xl mx-auto">
+        <section className="py-24 px-6 bg-pink-50" id="mainMessage" data-aos="fade-up"> 
+          <div className="max-w-4xl mx-auto" data-aos="zoom-in" data-aos-delay="200">
             <div className="relative group">
             {/* Decorative background elements */}
             <div className="absolute inset-0 bg-gradient-to-r from-pink-200/50 to-rose-200/50 rounded-[2.5rem] transform rotate-2 group-hover:rotate-1 transition-transform duration-300"></div>
@@ -262,7 +470,7 @@ const HappyBirthdayWebsite = () => {
                 <div className="relative z-10">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 text-center group-hover:scale-105 transition-transform duration-300"
                     style={{fontFamily: 'Dancing Script, cursive'}}>
-                    A Special Day for a Special Person
+                    To the most special person in my life,<br /> to my "love"
                 </h2>
                 
                 {/* Interactive text reveal */}
@@ -284,15 +492,17 @@ const HappyBirthdayWebsite = () => {
             </div>
         </div>
         </section>
+        <hr />
 
       {/* Memory Cards Section */}
         <section className="relative">
-        {memories.map((memory, index) => (
+          {memories.map((memory, index) => (
             <div
-            key={index}
-            className={`min-h-screen relative flex items-center justify-center px-6 py-24 ${
+              key={index}
+              className={`min-h-screen relative flex items-center justify-center px-6 py-24 ${
                 index % 2 === 0 ? 'bg-pink-50' : 'bg-white'
-            }`}
+              }`}
+              data-aos={index % 2 === 0 ? 'fade-right' : 'fade-left'}
             >
             <div className="absolute inset-0 opacity-10">
                 {/* Decorative background patterns */}
@@ -301,29 +511,19 @@ const HappyBirthdayWebsite = () => {
             </div>
 
             <div className="max-w-7xl mx-auto">
-                <div className="grid lg:grid-cols-2 gap-12 items-center">
-                {/* Image Container */}
-                <div className={`relative group ${index % 2 === 0 ? 'order-1' : 'order-1 lg:order-2'}`}>
-                    <div className="relative rounded-3xl overflow-hidden shadow-2xl transform transition-transform duration-500 group-hover:scale-[1.02]">
-                    {/* Replace the div below with an actual image */}
-                    <div className="aspect-[4/3] bg-gradient-to-br from-pink-200 to-rose-200 relative overflow-hidden">
-                        <div className="absolute inset-0 flex items-center justify-center text-pink-500/30">
-                        <div className="text-9xl">{memory.icon}</div>
-                        </div>
-                    </div>
-                    
-                    {/* Image overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                    
-                    {/* Decorative elements */}
-                    <div className="absolute -top-4 -right-4 w-24 h-24 bg-pink-100 rounded-full blur-2xl opacity-60"></div>
-                    <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-rose-100 rounded-full blur-2xl opacity-60"></div>
+              <div className="grid lg:grid-cols-2 gap-12 items-center">
+                <div className={`relative group ${index % 2 === 0 ? 'order-1' : 'order-1 lg:order-2'}`}
+                    data-aos="zoom-in" data-aos-delay="200">
+                  <MemoryCarousel images={memory.images} groupId={index} />
+                  
+                  {/* Keep the decorative elements */}
+                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-pink-100 rounded-full blur-2xl opacity-60"></div>
+                  <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-rose-100 rounded-full blur-2xl opacity-60"></div>
                 </div>
 
                 {/* Content Container */}
-                <div className={`relative z-10 ${index % 2 === 0 ? 'order-2' : 'order-2 lg:order-1'}`}>
-                    <div className="space-y-8 p-8">
+                <div className={`relative z-10 ${index % 2 === 0 ? 'order-2' : 'order-2 lg:order-1'}`}
+                  data-aos="fade-up" data-aos-delay="400">
                     {/* Icon */}
                     <div className="w-16 h-16 bg-gradient-to-br from-pink-400 to-rose-500 rounded-2xl flex items-center justify-center shadow-xl transform -rotate-6 hover:rotate-0 transition-transform duration-300">
                         <div className="text-white w-8 h-8">
@@ -332,7 +532,7 @@ const HappyBirthdayWebsite = () => {
                     </div>
 
                     {/* Title */}
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900"
+                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 my-6"
                         style={{fontFamily: 'Dancing Script, cursive'}}>
                         {memory.title}
                     </h2>
@@ -343,113 +543,110 @@ const HappyBirthdayWebsite = () => {
                     </p>
 
                     {/* Decorative line */}
-                    <div className="w-24 h-1 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full"></div>
+                    <div className="w-24 h-1 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full my-2"></div>
                     </div>
                 </div>
                 </div>
             </div>
-            </div>
+
         ))}
         </section>
-
+        <hr />
         {/* Birthday Wishes Section */}
-        <section className="py-24 px-6 bg-gradient-to-b from-white to-pink-50">
-        <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4"
-                style={{fontFamily: 'Dancing Script, cursive'}}>
+        <section className="py-24 px-6 bg-gradient-to-b from-white to-pink-50" id="birthdayWishes" data-aos="fade-up">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16" data-aos="fade-down">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4"
+                  style={{fontFamily: 'Dancing Script, cursive'}}>
                 Birthday Wishes
-            </h2>
-            <p className="text-xl text-gray-600">Messages from your loved ones</p>
+              </h2>
+              <p className="text-xl text-gray-600">22 Messages for You</p>
             </div>
             
-            <div className="grid gap-8 md:gap-12">
-            {wishes.map((wish, index) => (
-                <div key={index} 
-                    className="group relative bg-white rounded-2xl p-6 md:p-8 shadow-xl hover:shadow-2xl transition-all duration-500">
-                <div className="grid md:grid-cols-[auto,1fr] gap-8">
-                    {/* Left Column - Images */}
-                    <div className="space-y-6">
-                    {/* Profile Image */}
-                    <div className="relative w-24 h-24 md:w-32 md:h-32 mx-auto md:mx-0">
-                        <div className="absolute inset-0 bg-gradient-to-br from-pink-400 to-rose-400 rounded-full blur-xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
-                        <img
-                        src={wish.profileImage}
-                        alt={wish.name}
-                        className="relative w-full h-full object-cover rounded-full border-4 border-white shadow-lg"
-                        />
-                    </div>
-                
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {wishes.map((wish, index) => (
+                <div 
+                  key={index}
+                  className={`group relative bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg hover:shadow-2xl 
+                  transition-all duration-500 hover:-translate-y-1 cursor-pointer
+                  ${index === wishes.length - 1 && wishes.length % 3 === 1 ? 'lg:col-start-2' : ''}`}
+                  data-aos="fade-up"
+                  data-aos-delay={index * 100}
+                >
+                  {/* Decorative background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-pink-100/50 to-rose-100/50 rounded-xl 
+                                opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  
+                  {/* Content */}
+                  <div className="relative space-y-4">
+                    {/* Message */}
+                    <p className="text-lg text-gray-700 leading-relaxed italic group-hover:text-gray-900 
+                                transition-colors duration-300">
+                      "{wish.message}"
+                    </p>
+
+                    {/* Interactive elements */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-2xl transform group-hover:scale-125 transition-transform duration-300">
+                        {wish.emoji}
+                      </span>
+                      <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center 
+                                    opacity-0 group-hover:opacity-100 transform translate-y-2 
+                                    group-hover:translate-y-0 transition-all duration-300">
+                        <Heart className="w-4 h-4 text-pink-500" />
+                      </div>
                     </div>
 
-                    {/* Right Column - Content */}
-                    <div className="relative">
-                    {/* Decorative elements */}
-                    <div className="absolute -top-4 -right-4 w-12 h-12 bg-pink-100 rounded-full blur-xl opacity-40"></div>
-                    
-                    {/* Content */}
-                    <div className="relative space-y-4">
-                        <div className="space-y-1">
-                        <h3 className="text-2xl font-bold text-gray-900">{wish.name}</h3>
-                        <p className="text-pink-500 font-medium">{wish.relationship}</p>
-                        </div>
-                        
-                        <div className="relative">
-                        <div className="absolute -left-4 top-0 w-1 h-full bg-gradient-to-b from-pink-500 to-rose-500 rounded-full"></div>
-                        <p className="text-lg text-gray-600 leading-relaxed italic">
-                            "{wish.message}"
-                        </p>
-                        </div>
-
-                        {/* Interactive elements */}
-                        <div className="flex items-center space-x-4 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                        <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center">
-                            <Heart className="w-4 h-4 text-pink-500" />
-                        </div>
-                        <span className="text-sm text-pink-500 font-medium">Sending love</span>
-                        </div>
-                    </div>
-                    </div>
+                    {/* Decorative line */}
+                    <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-rose-500 
+                                  group-hover:w-full transition-all duration-500"></div>
+                  </div>
                 </div>
-                </div>
-            ))}
+              ))}
             </div>
-        </div>
+          </div>
         </section>
+        <hr />
 
-      {/* Call to Action */}
-      <section className="py-24 px-6 bg-gradient-to-r from-pink-500 to-pink-600">
-        <div className="max-w-2xl mx-auto text-center text-white">
-          <div className="text-6xl mb-8">🎂</div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Make a Wish
-          </h2>
-          <p className="text-xl text-pink-100 mb-8 leading-relaxed">
-            Blow out the candles and let this new year be filled with everything your heart desires
-          </p>
-          <div className="inline-flex items-center space-x-2 px-8 py-4 bg-white text-pink-600 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300">
-            <span>Cheers to You!</span>
-            <Heart className="w-5 h-5" />
-          </div>
-        </div>
-      </section>
+        <iframe
+          data-testid="embed-iframe"
+          style={{ borderRadius: "12px", margin: "auto", display: "block", paddingTop: "2rem", paddingBottom: "2rem" }}
+          src="https://open.spotify.com/embed/track/2NxnWXho1vkCkuBijDyYNK?utm_source=generator"
+          width="60%"
+          height="152"
+          frameBorder="0"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          allowFullScreen
+          loading="lazy"
+          data-aos="fade-up"
+        />
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="flex justify-center space-x-2 mb-6">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="w-2 h-2 bg-pink-500 rounded-full"></div>
-            ))}
-          </div>
-          <p className="text-lg text-gray-300 mb-2">
-            With love and best wishes
-          </p>
-          <p className="text-gray-400">
-            May your birthday be the start of an incredible year ahead
-          </p>
+      {showReturnToTop && (
+        <div 
+          onClick={returnToTop}
+          className="fixed bottom-8 right-8 w-12 h-12 bg-pink-500 rounded-full shadow-lg hover:shadow-xl 
+          hover:bg-pink-600 transition-all duration-300 cursor-pointer flex items-center justify-center 
+          transform hover:scale-110 z-50"
+          style={{
+            animation: 'bounce 2s infinite'
+          }}
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            className="h-6 w-6 text-white" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M5 10l7-7m0 0l7 7m-7-7v18" 
+            />
+          </svg>
         </div>
-      </footer>
+      )}
     </div>
   );
 };
