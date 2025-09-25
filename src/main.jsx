@@ -559,8 +559,10 @@ const HappyBirthdayWebsite = () => {
                 {/* Interactive text reveal */}
                 <div className="relative overflow-hidden">
                     <p className="text-lg text-gray-600 leading-relaxed text-center max-w-3xl mx-auto transform group-hover:translate-y-0 transition-all duration-500 opacity-90 group-hover:opacity-100">
-                    Today marks another beautiful chapter in your story. We celebrate not just the passing of time, 
-                    but the incredible person you've become and the joy you bring to everyone around you.
+                    Happy Birthday love! 22 kana grabe, wara la ig abat sito time na nakadto kit sa waiting shed, na kinukulbaan ka kay wara talaga saim plano na magtake Social Work na program, 
+                    let alone an im pag-iskwela lat sa Tacloban, pero ginface mo tun courageously and adi ka na yana! Proud na proud ak pirme saim love, di ko ngani tun naeexpress sin enough pero ka amazing
+                    talaga saim mga kaya himuon, always talaga na 100% ak pagka proud na ikaw ak girlfriend. Dire ko maenvision ak life na waray ka, and napakablessed ko na for 6 years adi ka la gihap kaupod ko.
+                    Thankful ak na adi ak para mawitness tanan na events saim buhay, and hoping na matupad ta aton dreams together. Ikaw la ak love, always, I love you so much, and Happy 22nd Birthday to my only love.
                     </p>
                     
                     {/* Interactive elements */}
