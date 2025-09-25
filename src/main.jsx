@@ -5,39 +5,112 @@ import 'aos/dist/aos.css';
 
 const MemoryCarousel = ({ images, groupId }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(null);
+  const [prevIndex, setPrevIndex] = useState(0);
+  const [animationKey, setAnimationKey] = useState(0); // Add this new state
+
+  const slideStyles = `
+    @keyframes slideLeft {
+      from { transform: translateX(0); }
+      to { transform: translateX(-100%); }
+    }
+    @keyframes slideRight {
+      from { transform: translateX(0); }
+      to { transform: translateX(100%); }
+    }
+    @keyframes slideInLeft {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+    @keyframes slideInRight {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+  `;
 
   const nextImage = () => {
+    setPrevIndex(currentIndex);
+    setDirection('slide-left');
     setCurrentIndex((prev) => (prev + 1) % images.length);
+    setAnimationKey(prev => prev + 1); // Increment key to force re-render
   };
 
   const prevImage = () => {
+    setPrevIndex(currentIndex);
+    setDirection('slide-right');
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+    setAnimationKey(prev => prev + 1); // Increment key to force re-render
+  };
+
+  const goToImage = (index) => {
+    setPrevIndex(currentIndex);
+    setDirection(index > currentIndex ? 'slide-left' : 'slide-right');
+    setCurrentIndex(index);
+    setAnimationKey(prev => prev + 1); // Increment key to force re-render
   };
 
   return (
     <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-      {/* Image */}
+      <style>{slideStyles}</style>
       <div className="aspect-[4/3] relative overflow-hidden">
-        <div className="absolute inset-0 transition-transform duration-500 ease-in-out">
+        {/* Previous Image */}
+        <div 
+          key={`prev-${animationKey}`} // Add key prop
+          className="absolute inset-0"
+          style={{
+            animation: direction === 'slide-left' 
+              ? 'slideLeft 0.5s forwards'
+              : direction === 'slide-right' 
+                ? 'slideRight 0.5s forwards'
+                : 'none',
+            zIndex: direction ? 1 : 0
+          }}
+        >
           <img 
-            src={images[currentIndex]} 
-            alt={`Memory ${currentIndex + 1}`}
+            src={images[prevIndex]} 
+            alt={`Memory ${prevIndex + 1}`}
             className="w-full h-full object-cover"
           />
         </div>
 
-        {/* Navigation arrows */}
+        {/* Current Image */}
+        <div 
+          key={`current-${animationKey}`} // Add key prop
+          className="absolute inset-0"
+          style={{
+            animation: direction === 'slide-left'
+              ? 'slideInLeft 0.5s forwards'
+              : direction === 'slide-right'
+                ? 'slideInRight 0.5s forwards'
+                : 'none',
+            zIndex: direction ? 2 : 1
+          }}
+        >
+          <img 
+            src={images[currentIndex]} 
+            alt={`Memory ${currentIndex + 1}`}
+            className="w-full h-full object-cover"
+            onAnimationEnd={() => setDirection(null)}
+          />
+        </div>
+
+        {/* Navigation Controls */}
         <button 
           onClick={prevImage}
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-300 hover:bg-white"
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 rounded-full 
+                   flex items-center justify-center backdrop-blur-sm transition-all duration-300 
+                   hover:bg-white hover:scale-110 z-10"
         >
           <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
+        
         <button 
           onClick={nextImage}
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-300 hover:bg-white"
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 rounded-full 
+                   flex items-center justify-center backdrop-blur-sm transition-all duration-300 
+                   hover:bg-white hover:scale-110 z-10"
         >
           <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -45,11 +118,11 @@ const MemoryCarousel = ({ images, groupId }) => {
         </button>
 
         {/* Dots indicator */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
           {images.map((_, idx) => (
             <button
               key={idx}
-              onClick={() => setCurrentIndex(idx)}
+              onClick={() => goToImage(idx)}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
                 idx === currentIndex ? 'bg-white w-4' : 'bg-white/50'
               }`}
@@ -140,19 +213,24 @@ const HappyBirthdayWebsite = () => {
       message: "When we first met, you immediately brought light and joy into my life. The past years sun na highschool ak was not comparable to the time na umabot ka saak life. Napakajoyful mo sun, im humor, aura, and smile, na hasta yana grateful ak na naiimdan ko la gihapon and dire nagffade.",
       icon: <Heart className="w-8 h-8" />,
       images: [
-        "/path/to/jhs-image1.jpg",
-        "/path/to/jhs-image2.jpg",
-        "/path/to/jhs-image3.jpg"
+        "/images/FB_IMG_1758801452235.jpg",
+        "/images/FB_IMG_1758801441694.jpg",
+        "/images/IMG20210813142322.jpg",
+        "/images/FB_IMG_1758801578763.jpg",
+        "/images/FB_IMG_1758801809950.jpg",
+        "/images/IMG20200304171621.jpg"
       ]
     },
     {
       title: "Senior Highschool Era",
-      message: "Dihan sine na time naconclude ko na napakaspecial mo talaga saak life. Sine na mga time ikaw an nagmotivate saak na magkamayda better aspirations saak buhay, na I should strive better and ada ka pirme para igmotivate and igreassure ak na magiging okay ta tanan.",
+      message: "Naimdan ko dihan love kun papano ka magpersevere para makuha an imo mga karuyag, and it made me admire you even more. Pirme ka nagsstrive to be better, leading me to be inspired by your dedication and hard work. Napakaproud ko saim pirme love.",
       icon: <Sparkles className="w-8 h-8" />,
       images: [
-        "/path/to/jhs-image1.jpg",
-        "/path/to/jhs-image2.jpg",
-        "/path/to/jhs-image3.jpg"
+        "/images/IMG_9054.JPG",
+        "/images/FB_IMG_1758810427446.jpg",
+        "/images/FB_IMG_1758801816243.jpg",
+        "/images/IMG20220311172004.jpg",
+        "/images/IMG_20220521_152527.jpg"
       ]
     },
     {
@@ -160,9 +238,16 @@ const HappyBirthdayWebsite = () => {
       message: "Constantly na gintetest ka sa mga challenges dida saim pag-iskwela dida sa LNU pero never ak nagdoubt talaga saim na di mo makakaya an mga bagay na gintthrow against saim. Hasta yana, tama ak sun na ak belief kasi tanan na challenges naovercome mo, you always come out stronger and better from every obstacle na im ginfface, and napakaproud ko na sadsun ak girlfriend.",
       icon: <Star className="w-8 h-8" />,
       images: [
-        "/path/to/jhs-image1.jpg",
-        "/path/to/jhs-image2.jpg",
-        "/path/to/jhs-image3.jpg"
+        "/images/Messenger_creation_69C00B39-9E1C-479F-8402-70DC18046A6E.jpeg",
+        "/images/Messenger_creation_604FAB7D-1067-4EE5-846D-E477608269D5.jpeg",
+        "/images/Messenger_creation_269543D5-EE5F-4AE8-9E68-A781F6FB1206.jpeg",
+        "/images/Messenger_creation_233257793111291.jpeg",
+        "/images/Messenger_creation_403684782355861.jpeg",
+        "/images/Messenger_creation_783026357053266.jpeg",
+        "/images/Messenger_creation_974339510932296.jpeg",
+        "/images/Messenger_creation_1072991530599876.jpeg",
+        "/images/Messenger_creation_1588593648617041.jpeg",
+        "/images/Messenger_creation_7435154673218473.jpeg",
       ]
     },
     {
@@ -170,10 +255,12 @@ const HappyBirthdayWebsite = () => {
       message: "Kapag kaupod ko ikaw love, waray second na nasasayang, kay iton manlat an mga time na nakakafeel ak na happy ak talaga dahil saim presence. Hopefully, mabless kit na magdaramo pa an mga adlaw na magkaupod kit, for me to contantly express my love for you.",
       icon: <Gift className="w-8 h-8" />,
       images: [
-        "/path/to/jhs-image1.jpg",
-        "/path/to/jhs-image2.jpg",
-        "/path/to/jhs-image3.jpg",
-        "/path/to/jhs-image4.jpg"
+        "/images/Messenger_creation_CA08806E-F7A7-4523-8D15-24FDA9368CE1.jpeg",
+        "/images/Messenger_creation_B0C945FB-8A3B-4CBE-92B1-690969851644.jpeg",
+        "/images/Messenger_creation_D1F79F22-76C3-416E-9200-6E103614500D.jpeg",
+        "/images/Messenger_creation_A3CE05BA-D7FA-44C5-B320-CF7F0DC647C0.jpeg",
+        "/images/Messenger_creation_70B10AA0-4E21-4943-8C23-565C7D7D4FBC.jpeg",
+        "/images/Messenger_creation_34926F72-02BB-463A-8F26-71286156BEB9.jpeg",
       ]
     }
   ];
@@ -367,7 +454,7 @@ const HappyBirthdayWebsite = () => {
               
               <div className="text-2xl md:text-3xl text-pink-500 mb-8" 
                    style={{fontFamily: 'Dancing Script, cursive'}}>
-                to my one and only, <b>Ryan!</b>
+                to my one and only, <b>Jyra!</b>
               </div>
             </div>
             
@@ -415,12 +502,8 @@ const HappyBirthdayWebsite = () => {
               {/* Main image placeholder */}
               <div className="relative w-80 h-80 md:w-96 md:h-96 rounded-3xl bg-gradient-to-br from-pink-100 to-rose-100 border-4 border-white shadow-2xl overflow-hidden">
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center p-8">
-                    <div className="w-24 h-24 bg-pink-500 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <Heart className="w-12 h-12 text-white" />
-                    </div>
-                    <div className="text-pink-600 font-semibold text-lg">Your Beautiful Photo</div>
-                    <div className="text-pink-500 text-sm mt-2">Goes Here</div>
+                  <div className="">
+                    <img src="/images/Messenger_creation_DF1153C4-C1F6-440C-BF0C-B2F2215D2DCA.jpeg" alt="Jyra" className="w-full h-full object-cover rounded-3xl border-4 border-white shadow-lg" />
                   </div>
                 </div>
                 
